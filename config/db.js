@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-MONGO_URI = `mongodb+srv://dev-asem:${process.env.DB_PASS}@auction01.x2jka.mongodb.net/?retryWrites=true&w=majority&appName=auction01`
+MONGO_URI = `mongodb+srv://${process.env.DB_USER}:${process.env.DB_PASS}@auction1.xqgqzau.mongodb.net/?retryWrites=true&w=majority&appName=auction1`
 
 const connectDB = async () => {
   try {

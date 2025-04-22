@@ -31,5 +31,4 @@ const auctionSchema = new mongoose.Schema({
   createdAt: { type: Date, default: Date.now },
 }, { timestamps: true });
 
-const Auction = mongoose.models.Auction || mongoose.model("Auction", auctionSchema);
-export default Auction;
+module.exports = mongoose.model('Auction', auctionSchema);
