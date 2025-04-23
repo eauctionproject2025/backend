@@ -2,15 +2,8 @@
 
 const multer = require("multer");
 
-const  storage = multer.diskStorage({
-    destination: (req, file, cd) => {
-        cd(null, "uploads/");  // store images in "uplaods/" folder.
-    },
-    filename: (req, file, cd) =>{
-        cd(null, Date.now() + "-" + file.originalname); // unique file name
-    }
-});
+const storage = multer.memoryStorage(); //  In-memory instead of filesystem
 
-const upload = multer({storage});
+const upload = multer({ storage });
 
 module.exports = upload;
