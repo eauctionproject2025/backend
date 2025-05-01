@@ -54,27 +54,16 @@ const loginUser =  async (req, res) => {
       //creating token
       const token = jwt.sign({ id: user._id, role: user.role }, process.env.JWT_SECRET, { expiresIn: "7d" });
       
-      //sending token to cookie
-      res.cookie("token", token, { httpOnly: true, secure: true, sameSite: "strict"})
+      //sending token to cookie and response body
+      res.cookie("next-auth.session-token", token, { httpOnly: true, secure: true, sameSite: "strict"})
          .json({ 
             message: "Login successful", 
             user: { id: user._id, name: user.name, email: user.email, nid: user.nid, image: user.image, role: user.role },
-            // accessToken: response.token,
+            accessToken: token,
         });
     } catch (error) {
       res.status(500).json({ msg: "Server error" });
     }
   }
 
-// // find User profile
-//   const getUserProfile = async (req, res) => {
-//     try {
-//         const user = await User.findById(req.user.id).select("-password");
-//         res.json(user);
-//     } catch (error) {
-//         res.status(500).json({ msg: "Server error" });
-//     }
-// };
-
-
-  module.exports = {registerUser, loginUser};
+module.exports = {registerUser, loginUser};
