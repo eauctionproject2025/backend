@@ -3,7 +3,7 @@ const router = express.Router();
 const { v2: cloudinary } = require('cloudinary');
 const upload = require('../middleware/upload'); //  Your memoryStorage config
 const { protect } = require('../middleware/authMiddleware');
-const {createAuction, getAllAuctions, deleteAuction } = require('../controllers/auctionController');
+const {createAuction, getAllAuctions, deleteAuction, getAuctionById, placeBid } = require('../controllers/auctionController');
 
 //  Cloudinary config
 cloudinary.config({
@@ -29,7 +29,7 @@ router.post('/auctions', protect, upload.single('image'), async (req, res) => {
 
         req.file.path = result.secure_url;
 
-        // ✅ Now call auction controller
+        //  Now call auction controller
         await createAuction(req, res);
         }
     );
@@ -41,8 +41,10 @@ router.post('/auctions', protect, upload.single('image'), async (req, res) => {
   }
 });
 
-// DELETE /api/auctions/:id
+router.get('/auctions/:id', getAuctionById);
+router.post('/auctions/:id/bid', protect, placeBid);
 
+// DELETE /api/auctions/:id
 router.delete('/auctions/:id', protect, deleteAuction);
 
 
