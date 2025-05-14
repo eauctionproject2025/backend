@@ -14,7 +14,7 @@ const getAllAuctions = async (req, res) => {
 //  POST /api/auctions — Protected, only sellers
 const createAuction = async (req, res) => {
   try {
-    const { title, description, startingBid } = req.body;
+    const { title, description, startingBid, startTime, endTime } = req.body;
     const seller = req.user.id;
 
     // Upload image to Cloudinary
@@ -24,6 +24,8 @@ const createAuction = async (req, res) => {
       title,
       description,
       startingBid,
+      startTime,
+      endTime,
       seller,
       imageUrl: result.secure_url,
     });

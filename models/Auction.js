@@ -15,6 +15,14 @@ const auctionSchema = new mongoose.Schema(
       type: Number,
       required: true,
     },
+    startTime: {
+      type: Date,
+      required: true,
+    },
+    endTime: {
+      type: Date,
+      required: true,
+    },
     seller: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
