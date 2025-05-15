@@ -35,6 +35,11 @@ const auctionSchema = new mongoose.Schema(
         time: { type: Date, default: Date.now },
       },
     ],
+    winner: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      default: null,
+    },
   },
   { timestamps: true }
 );
