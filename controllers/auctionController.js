@@ -1,5 +1,6 @@
 const Auction = require("../models/Auction");
 const cloudinary = require("../config/cloudinary");
+const User = require("../models/User");
 
 //  GET /api/auctions — Public route
 const getAllAuctions = async (req, res) => {
@@ -42,7 +43,8 @@ const getAuctionById = async (req, res) => {
   try {
     const auction = await Auction.findById(req.params.id)
       .populate("seller", "username email") // show seller info
-      .populate("bids.bidder", "username"); // show bidder usernames
+      .populate("bids.bidder", "username") // show bidder usernames
+      .populate("winner", "username");
 
     if (!auction) {
       return res.status(404).json({ message: "Auction not found" });
@@ -59,7 +61,8 @@ const getAuctionById = async (req, res) => {
         prev.amount > current.amount ? prev : current
       );
 
-      auction.winner = highestBid.bidder._id;
+      auction.winner= highestBid.bidder;
+      // auction.winner.username = highestBid.bidder.username;
       await auction.save();
     }
 
@@ -127,10 +130,41 @@ const placeBid = async (req, res) => {
   }
 };
 
+//Fetch auctions by userId
+const getAuctionsByUserId = async (req, res) => {
+  try {
+    const { userId } = req.params;
+
+    // Fetch the user's details
+    const user = await User.findById(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Fetch auction history based on the user's role
+    let history = [];
+    if (user.role === 'seller') {
+      history = await Auction.find({ seller: userId });
+    } else if (user.role === 'buyer') {
+      history = await Auction.find({ 'bids.bidder': userId });
+    }
+
+    if (!history.length) {
+      return res.status(404).json({ message: 'No auctions found for this user' });
+    }
+
+    res.json(history);
+  } catch (err) {
+    console.error('Error fetching auctions by userId:', err);
+    res.status(500).json({ message: 'Server error' });
+  }
+};
+
 module.exports = {
   getAllAuctions,
   createAuction,
   getAuctionById,
   deleteAuction,
   placeBid,
+  getAuctionsByUserId,
 };

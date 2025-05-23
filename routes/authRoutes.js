@@ -2,7 +2,7 @@ const express = require("express");
 const {body, validationResult } = require("express-validator");
 const upload = require("../middleware/upload")
 const authMiddleware = require("../middleware/authMiddleware")
-const {registerUser, loginUser, } = require("../controllers/authController") 
+const {registerUser, loginUser, getUserProfile } = require("../controllers/authController") 
 
 const router = express.Router();
 
@@ -21,7 +21,7 @@ router.post("/login", [
     body("role").notEmpty().withMessage("role must be selected"),
   ], loginUser); //loginUser is a controller function
   
-//user profile 
+//user profile  
 // router.get("/profile", authMiddleware, getUserProfile)
 
 module.exports = router;
