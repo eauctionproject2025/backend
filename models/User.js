@@ -8,6 +8,8 @@ const userSchema = new mongoose.Schema({
   nid: { type: Number, required: true, unique:true, length:10}, // gpt says String
   image: { type: String, default:""},
   role: { type: String, enum: ["buyer", "seller", "admin"], default: "buyer" },
+  description: { type: String },
+  address: { type: String },
 }, { timestamps: true });
 
 module.exports = mongoose.model("User", userSchema);

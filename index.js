@@ -5,8 +5,8 @@ const authRoutes = require("./routes/authRoutes")
 const auctionRoutes = require("./routes/auctionRoutes");
 const userRoutes = require("./routes/user");
 const userAuction = require('./routes/userAuction');
+const uploadProfile = require('./routes/uploadProfile');
 const bidRoutes = require('./routes/bid');
-const user = require('./routes/user');
 const cookieParser = require('cookie-parser');
 
 const app = express();
@@ -28,10 +28,11 @@ app.get("/", (req, res) => {
 });
 app.use("/api/auth", authRoutes)  
 
-app.use('/api', auctionRoutes);
+app.use('/api/auctions', auctionRoutes);
 
-app.use('/api/users/', userRoutes);
+app.use('/api/users', userRoutes);
 app.use('/api/auctions', userAuction);
+app.use('/api/uploads', uploadProfile);
 // app.use('/api/bids', bidRoutes);
 // Start server
 const PORT = process.env.PORT || 5000;

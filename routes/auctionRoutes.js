@@ -12,9 +12,9 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-router.get('/auctions', getAllAuctions);
+router.get('/', getAllAuctions);
 //  Your route to handle uploads
-router.post('/auctions', protect, upload.single('image'), async (req, res) => {
+router.post('/', protect, upload.single('image'), async (req, res) => {
   try {
     const fileBuffer = req.file.buffer;
 
@@ -41,14 +41,14 @@ router.post('/auctions', protect, upload.single('image'), async (req, res) => {
   }
 });
 
-router.get('/auctions/:id', getAuctionById);
-router.post('/auctions/:id/bid', protect, placeBid);
+router.get('/:id', getAuctionById);
+router.post('/:id/bid', protect, placeBid);
 
 // Add a new route to fetch auctions by userId
-router.get('/auctions/user/:userId', getAuctionsByUserId);
+router.get('/user/:userId', getAuctionsByUserId);
 // DELETE /api/auctions/:id
 
-router.delete('/auctions/:id', protect, deleteAuction);
+router.delete('/:id', protect, deleteAuction);
 
 
 module.exports = router;
