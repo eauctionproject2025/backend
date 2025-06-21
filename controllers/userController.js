@@ -1,6 +1,17 @@
 const cloudinary = require("../config/cloudinary");
 const User = require("../models/User"); 
-exports.updateUser = async (req, res) => {
+
+const getAllUsers = async (req, res) => {
+  try {
+    const users = await User.find().select("name email nid image role address description blocked ");
+    res.status(200).json(users);
+  } catch (err) {
+    console.error("Error fetching users:", err);
+    res.status(500).json({ message: "Server error" });
+  }
+}
+
+const updateUser = async (req, res) => {
   try {
     const userId = req.params.id;
     const { description, address, image } = req.body;
@@ -31,4 +42,9 @@ exports.updateUser = async (req, res) => {
     console.error("Error updating profile:", err);
     res.status(500).json({ message: "Server error" });
   }
+};
+
+module.exports = {
+  updateUser,
+  getAllUsers
 };

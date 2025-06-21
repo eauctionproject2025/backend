@@ -1,8 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const { updateUser } = require("../controllers/userController");
-const { protect } = require('../middleware/authMiddleware');
+const { getAllUsers, updateUser } = require("../controllers/userController");
+const { protect, isAdmin } = require('../middleware/authMiddleware');
 const User = require('../models/User');
+
+router.get('/', getAllUsers);
 
 // Get user info by ID
 router.get('/:id', async (req, res) => {
@@ -17,5 +19,25 @@ router.get('/:id', async (req, res) => {
 });
 // Update user profile
 router.put('/:id', protect, updateUser);
+
+// Block or unblock a user
+router.patch('/block/:id', protect, isAdmin, async (req, res) => {
+  try {
+    const userId = req.params.id;
+    const { block } = req.body; // true or false
+
+    const user = await User.findByIdAndUpdate(
+      userId,
+      { blocked: block },
+      { new: true }
+    );
+
+    if (!user) return res.status(404).json({ error: "User not found" });
+
+    res.json({ message: `User ${block ? 'blocked' : 'unblocked'}`, user });
+  } catch (err) {
+    res.status(500).json({ error: "Server error" });
+  }
+});
 
 module.exports = router;

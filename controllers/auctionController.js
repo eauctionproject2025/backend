@@ -5,7 +5,9 @@ const User = require("../models/User");
 //  GET /api/auctions — Public route
 const getAllAuctions = async (req, res) => {
   try {
-    const auctions = await Auction.find().sort({ createdAt: -1 });
+    const auctions = await Auction.find().sort({ createdAt: -1 })
+      .populate("seller", "username email")
+      .populate("winner", "username"); 
     res.status(200).json(auctions);
   } catch (error) {
     res.status(500).json({ message: "Failed to fetch auctions" });
@@ -18,8 +20,28 @@ const createAuction = async (req, res) => {
     const { title, description, startingBid, startTime, endTime } = req.body;
     const seller = req.user.id;
 
-    // Upload image to Cloudinary
-    const result = await cloudinary.uploader.upload(req.file.path);
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ message: 'No images uploaded' });
+    }
+
+    // Upload all files in parallel
+    const uploadPromises = req.files.map(file => {
+      return new Promise((resolve, reject) => {
+        const stream = cloudinary.uploader.upload_stream(
+          { resource_type: 'auto' },
+          (error, result) => {
+            if (error) reject(error);
+            else resolve(result);
+          }
+        );
+        stream.end(file.buffer);
+      });
+    });
+
+    const results = await Promise.all(uploadPromises);
+
+    const imageUrls = results.map(r => r.secure_url);
+    const cloudUrls = results.map(r => r.public_id);
 
     const newAuction = new Auction({
       title,
@@ -28,15 +50,18 @@ const createAuction = async (req, res) => {
       startTime,
       endTime,
       seller,
-      imageUrl: result.secure_url,
+      imageUrls,      
+      cloudUrls,      
     });
 
     await newAuction.save();
     res.status(201).json(newAuction);
   } catch (error) {
+    console.error('Auction create error:', error);
     res.status(500).json({ message: error.message });
   }
 };
+
 
 //  GET /api/auctions/:id — Public
 const getAuctionById = async (req, res) => {
@@ -82,16 +107,23 @@ const deleteAuction = async (req, res) => {
     }
 
     // Check if the logged-in user is the creator
-    if (auction.seller.toString() !== req.user.id) {
+    if (auction.seller.toString() !== req.user.id && req.user.role !== "admin") {
       return res
         .status(403)
         .json({ message: "Not authorized to delete this auction" });
     }
+    
+    // Delete image from Cloudinary
+    for (const publicId of auction.cloudUrls) {
+      await cloudinary.uploader.destroy(publicId);
+    }
+
 
     await auction.deleteOne();
     res.json({ message: "Auction deleted" });
   } catch (error) {
     console.log(error);
+
     res.status(500).json({ message: "Server error" });
   }
 };

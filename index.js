@@ -6,8 +6,9 @@ const auctionRoutes = require("./routes/auctionRoutes");
 const userRoutes = require("./routes/user");
 const userAuction = require('./routes/userAuction');
 const uploadProfile = require('./routes/uploadProfile');
-const bidRoutes = require('./routes/bid');
+const adminRoutes = require('./routes/adminRoutes');
 const cookieParser = require('cookie-parser');
+
 
 const app = express();
 
@@ -26,14 +27,19 @@ app.use(cookieParser());
 app.get("/", (req, res) => {
   res.send("API is running...");
 });
+// Authentication routes
 app.use("/api/auth", authRoutes)  
-
+// Auction routes
 app.use('/api/auctions', auctionRoutes);
-
+// User routes
 app.use('/api/users', userRoutes);
+// User auction routes
 app.use('/api/auctions', userAuction);
+// Upload profile image route
 app.use('/api/uploads', uploadProfile);
-// app.use('/api/bids', bidRoutes);
+// Admin routes
+app.use('/api/admin', adminRoutes);
+
 // Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

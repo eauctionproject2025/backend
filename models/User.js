@@ -10,6 +10,10 @@ const userSchema = new mongoose.Schema({
   role: { type: String, enum: ["buyer", "seller", "admin"], default: "buyer" },
   description: { type: String },
   address: { type: String },
+  blocked: {
+    type: Boolean,
+    default: false,
+  },
 }, { timestamps: true });
 
 module.exports = mongoose.model("User", userSchema);

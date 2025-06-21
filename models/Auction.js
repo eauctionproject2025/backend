@@ -7,9 +7,12 @@ const auctionSchema = new mongoose.Schema(
       required: true,
     },
     description: String,
-    imageUrl: {
-      type: String,
+    imageUrls: {
+      type: [String], 
       required: true,
+    },
+    cloudUrls: {
+      type: [String], 
     },
     startingBid: {
       type: Number,
