@@ -7,7 +7,8 @@ const getAllAuctions = async (req, res) => {
   try {
     const auctions = await Auction.find().sort({ createdAt: -1 })
       .populate("seller", "username email")
-      .populate("winner", "username"); 
+      .populate("winner", "username")
+      .populate("categories", "name icon link");
     res.status(200).json(auctions);
   } catch (error) {
     res.status(500).json({ message: "Failed to fetch auctions" });
@@ -17,11 +18,14 @@ const getAllAuctions = async (req, res) => {
 //  POST /api/auctions — Protected, only sellers
 const createAuction = async (req, res) => {
   try {
-    const { title, description, startingBid, startTime, endTime } = req.body;
+    const { title, description, categories, startingBid, startTime, endTime } = req.body;
     const seller = req.user.id;
 
     if (!req.files || req.files.length === 0) {
       return res.status(400).json({ message: 'No images uploaded' });
+    }
+    if (!categories) {
+      return res.status(400).json({ message: "Category is required" });
     }
 
     // Upload all files in parallel
@@ -46,6 +50,7 @@ const createAuction = async (req, res) => {
     const newAuction = new Auction({
       title,
       description,
+      categories: Array.isArray(categories) ? categories : [categories],
       startingBid,
       startTime,
       endTime,
@@ -69,7 +74,8 @@ const getAuctionById = async (req, res) => {
     const auction = await Auction.findById(req.params.id)
       .populate("seller", "username email") // show seller info
       .populate("bids.bidder", "username") // show bidder usernames
-      .populate("winner", "username");
+      .populate("winner", "username") // show winner username
+      .populate("categories", "name icon link"); // populate categories
 
     if (!auction) {
       return res.status(404).json({ message: "Auction not found" });

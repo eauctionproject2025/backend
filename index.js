@@ -4,6 +4,7 @@ const cors = require("cors");
 const authRoutes = require("./routes/authRoutes")
 const auctionRoutes = require("./routes/auctionRoutes");
 const userRoutes = require("./routes/user");
+const categoryRoutes = require ('./routes/categoryRoutes');
 const userAuction = require('./routes/userAuction');
 const uploadProfile = require('./routes/uploadProfile');
 const adminRoutes = require('./routes/adminRoutes');
@@ -39,7 +40,8 @@ app.use('/api/auctions', userAuction);
 app.use('/api/uploads', uploadProfile);
 // Admin routes
 app.use('/api/admin', adminRoutes);
-
+// Category routes
+app.use('/api/categories', categoryRoutes);
 // Start server
 const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

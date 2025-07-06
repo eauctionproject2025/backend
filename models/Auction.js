@@ -43,6 +43,12 @@ const auctionSchema = new mongoose.Schema(
       ref: "User",
       default: null,
     },
+    categories: [{
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Category',
+      required: true,
+    }]
+
   },
   { timestamps: true }
 );
