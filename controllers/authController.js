@@ -14,10 +14,10 @@ const registerUser = async(req, res) =>{
     const image = req.file ? req.file.filename : ""; 
 
     try{
-        let user = await User.findOne({ email });    //checking is this email already exist or not
+        let user = await User.findOne({ email });   
         if(user) return res.status(400).json({ msg: "Email alrady exist"})
 
-        user = await User.findOne({nid});        //checking is this NID already exist or not
+        user = await User.findOne({nid}); 
         if(user) return res.status(400).json({msg:"NID alrady exist"});
 
         // to check all fields are filled

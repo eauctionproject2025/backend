@@ -5,7 +5,39 @@ const User = require("../models/User");
 //  GET /api/auctions — Public route
 const getAllAuctions = async (req, res) => {
   try {
-    const auctions = await Auction.find().sort({ createdAt: -1 })
+    const { search, limit = 10, page = 1, type } = req.query;
+    const skip = (page - 1) * limit;
+    
+    let query = {};
+    if (search) { 
+      query = {
+        $or: [
+          { title: { $regex: search, $options: 'i' } },
+          { description: { $regex: search, $options: 'i' } },
+        ]
+      }
+    }
+
+    const now = new Date();
+
+    if (type === "active") {
+      query.startTime = { $lte: now };
+      query.endTime = { $gte: now };
+    } else if (type === "ended") {
+      query.endTime = { $lt: now };
+    } else if (type === "pending") {
+      query.startTime = { $gt: now };
+    }else if (type === "soon-ending") {
+      const soon = new Date(now.getTime() + 1000 * 60 * 60 * 24); // within 24 hours
+      query.endTime = { $gte: now, $lte: soon };
+    } else if (type === "recent") {
+      query = {};
+    }
+
+    const auctions = await Auction.find(query)
+      .sort(type === "recent" ? { createdAt: -1 } : { endTime: 1 }) // Sort by end time for active/ended, or createdAt for recent
+      .skip(skip)
+      .limit(parseInt(limit))
       .populate("seller", "username email")
       .populate("winner", "username")
       .populate("categories", "name icon link");
