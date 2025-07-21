@@ -1,6 +1,7 @@
 const Auction = require("../models/Auction");
 const cloudinary = require("../config/cloudinary");
 const User = require("../models/User");
+// const { userBlocked } = require("../middleware/authMiddleware");
 
 //  GET /api/auctions — Public route
 const getAllAuctions = async (req, res) => {
@@ -33,12 +34,22 @@ const getAllAuctions = async (req, res) => {
     } else if (type === "recent") {
       query = {};
     }
+    
+    if (!req.user || req.user.role !== "admin") {
+      try {
+        const blockedUserIds = await User.find({ blocked: true }).distinct("_id");
+        query.seller = { $nin: blockedUserIds };
+      } catch (err) {
+        console.error("Error fetching blocked users", err);
+        return res.status(500).json({ message: "Failed to process blocked users" });
+      }
+    }
 
     const auctions = await Auction.find(query)
       .sort(type === "recent" ? { createdAt: -1 } : { endTime: 1 }) // Sort by end time for active/ended, or createdAt for recent
       .skip(skip)
       .limit(parseInt(limit))
-      .populate("seller", "username email")
+      .populate("seller", "username blocked") //email is not populated here
       .populate("winner", "username")
       .populate("categories", "name icon link");
     res.status(200).json(auctions);
@@ -104,8 +115,8 @@ const createAuction = async (req, res) => {
 const getAuctionById = async (req, res) => {
   try {
     const auction = await Auction.findById(req.params.id)
-      .populate("seller", "username email") // show seller info
-      .populate("bids.bidder", "username") // show bidder usernames
+      .populate("seller", "username") // show seller info, email is not populated here
+      .populate("bids.bidder", "username blocked") // show bidder usernames
       .populate("winner", "username") // show winner username
       .populate("categories", "name icon link"); // populate categories
 

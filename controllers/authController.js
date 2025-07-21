@@ -18,10 +18,11 @@ const registerUser = async(req, res) =>{
         if(user) return res.status(400).json({ msg: "Email alrady exist"})
 
         user = await User.findOne({nid}); 
-        if(user) return res.status(400).json({msg:"NID alrady exist"});
+        if(user) return res.status(400).json({msg:"NID alrady registered"});
 
         // to check all fields are filled
         if(!name || !email || !password || !nid || !role) return res.status(400).json({msg: "All fields are required"});
+        
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(password, salt);
 
@@ -58,7 +59,7 @@ const loginUser =  async (req, res) => {
       res.cookie("next-auth.session-token", token, { httpOnly: true, secure: true, sameSite: "strict"})
          .json({ 
             message: "Login successful", 
-            user: { id: user._id, name: user.name, email: user.email, nid: user.nid, image: user.image, role: user.role },
+            user: { id: user._id, name: user.name, email: user.email, nid: user.nid, image: user.image, role: user.role, blocked: user.blocked },
             accessToken: token,
         });
     } catch (error) {

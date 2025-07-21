@@ -3,12 +3,15 @@ const cloudinary = require('../config/cloudinary');
 
 const createCategory = async (req, res) => {
   try {
-    const { name, link } = req.body;
-
+    let { name, link } = req.body;
     if (!req.file) {
       return res.status(400).json({ message: "No file uploaded" });
     }
-
+    //how to check if the same category already exists
+    const existingCategory = await Category.findOne({ name });
+    if (existingCategory) {
+      return res.status(400).json({ message: "Category already exists" });
+    }
     const uploadedResponse = await new Promise((resolve, reject) => {
       const stream = cloudinary.uploader.upload_stream(
         { folder: 'categories' },
@@ -19,7 +22,6 @@ const createCategory = async (req, res) => {
       );
       stream.end(req.file.buffer);
     });
-
     const newCategory = new Category({
       name,
       link,
@@ -31,8 +33,7 @@ const createCategory = async (req, res) => {
     res.status(201).json(newCategory);
 
   } catch (error) {
-    console.error(error);
-    res.status(500).json({ error: "Server error" });
+    res.status(500).json({ message: `Server error` });
   }
 };
 

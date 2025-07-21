@@ -6,10 +6,6 @@ const authMiddleware = (req, res, next) => {
     let token = req.cookies.token || req.header("Authorization")?.replace("Bearer ", "");
     if (token) token = token.trim();
 
-    console.log('Cookies:', req.cookies);
-    console.log('Authorization Header:', req.headers.authorization);
-    console.log('Token to verify:', token);
-
     // Check if not token
     if (!token) return res.status(401).json({message: "Unauthorized"});
 
@@ -68,4 +64,11 @@ const restrictTo = (...roles) => {
   };
 };
 
-module.exports = {authMiddleware, protect, isAdmin, restrictTo};
+const userBlocked = (req, res, next) => {
+  if (req.user && req.user.blocked) {
+    return res.status(403).json({ error: "Access denied: user is blocked" });
+  }
+  next();
+};
+
+module.exports = {authMiddleware, protect, isAdmin, restrictTo, userBlocked};
