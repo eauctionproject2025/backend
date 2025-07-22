@@ -3,7 +3,7 @@ const cloudinary = require('../config/cloudinary');
 
 const createCategory = async (req, res) => {
   try {
-    let { name, link } = req.body;
+    let { name } = req.body;
     if (!req.file) {
       return res.status(400).json({ message: "No file uploaded" });
     }
@@ -24,7 +24,6 @@ const createCategory = async (req, res) => {
     });
     const newCategory = new Category({
       name,
-      link,
       icon: uploadedResponse.secure_url,
       public_id: uploadedResponse.public_id,
     });
@@ -33,7 +32,7 @@ const createCategory = async (req, res) => {
     res.status(201).json(newCategory);
 
   } catch (error) {
-    res.status(500).json({ message: `Server error` });
+    res.status(500).json({ message: error.message || "Server error" });
   }
 };
 

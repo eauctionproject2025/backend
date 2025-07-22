@@ -51,7 +51,7 @@ const getAllAuctions = async (req, res) => {
       .limit(parseInt(limit))
       .populate("seller", "username blocked") //email is not populated here
       .populate("winner", "username")
-      .populate("categories", "name icon link");
+      .populate("categories", "name icon");
     res.status(200).json(auctions);
   } catch (error) {
     res.status(500).json({ message: "Failed to fetch auctions" });
@@ -118,7 +118,7 @@ const getAuctionById = async (req, res) => {
       .populate("seller", "username") // show seller info, email is not populated here
       .populate("bids.bidder", "username blocked") // show bidder usernames
       .populate("winner", "username") // show winner username
-      .populate("categories", "name icon link"); // populate categories
+      .populate("categories", "name icon"); // populate categories
 
     if (!auction) {
       return res.status(404).json({ message: "Auction not found" });
