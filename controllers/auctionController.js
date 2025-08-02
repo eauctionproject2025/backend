@@ -6,7 +6,7 @@ const User = require("../models/User");
 //  GET /api/auctions — Public route
 const getAllAuctions = async (req, res) => {
   try {
-    const { search, limit = 10, page = 1, type } = req.query;
+    const { search, limit = 20, page = 1, type } = req.query;
     const skip = (page - 1) * limit;
     
     let query = {};
@@ -46,7 +46,7 @@ const getAllAuctions = async (req, res) => {
     }
 
     const auctions = await Auction.find(query)
-      .sort(type === "recent" ? { createdAt: -1 } : { endTime: 1 }) // Sort by end time for active/ended, or createdAt for recent
+      .sort(type === "recent" ? { createdAt: -1 } : { createdAt: -1, endTime: 1 })
       .skip(skip)
       .limit(parseInt(limit))
       .populate("seller", "username blocked") //email is not populated here
