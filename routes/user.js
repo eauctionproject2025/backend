@@ -9,7 +9,7 @@ router.get('/', getAllUsers);
 // Get user info by ID
 router.get('/:id', async (req, res) => {
   try {
-    const user = await User.findById(req.params.id).select('name email image role address description');
+    const user = await User.findById(req.params.id).select('name email image role stripeOnboardingComplete address description');
     if (!user) return res.status(404).json({ message: 'User not found' });
     res.json(user);
   } catch (err) {

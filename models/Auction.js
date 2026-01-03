@@ -31,16 +31,28 @@ const auctionSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-    bids: [
-      {
-        bidder: { type: mongoose.Schema.Types.ObjectId, ref: "User" },
-        amount: Number,
-        time: { type: Date, default: Date.now },
-      },
-    ],
+    // bids array removed for scalability
+    currentBid: {
+       type: Number,
+       default: 0
+    },
     winner: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
+      default: null,
+    },
+    paymentStatus: {
+      type: String,
+      enum: ["pending", "payment_held", "completed", "refunded"],
+      default: "pending",
+    },
+    shipmentStatus: {
+      type: String,
+      enum: ["pending", "shipped", "delivered"],
+      default: "pending",
+    },
+    paymentSessionId: {
+      type: String,
       default: null,
     },
     categories: [{

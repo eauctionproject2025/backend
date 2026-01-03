@@ -3,7 +3,8 @@ const router = express.Router();
 const { v2: cloudinary } = require('cloudinary');
 const upload = require('../middleware/upload'); //  Your memoryStorage config
 const { protect } = require('../middleware/authMiddleware');
-const {createAuction, getAllAuctions, deleteAuction, getAuctionById, placeBid, getAuctionsByUserId } = require('../controllers/auctionController');
+const {createAuction, getAllAuctions, deleteAuction, getAuctionById, getAuctionsByUserId, markShipped } = require('../controllers/auctionController');
+const { placeBid } = require('../controllers/bidController');
 
 //  Cloudinary config 
 cloudinary.config({
@@ -22,8 +23,10 @@ router.post('/:id/bid', protect, placeBid);
 
 // Add a new route to fetch auctions by userId
 router.get('/user/:userId', getAuctionsByUserId);
-// DELETE /api/auctions/:id
 
+router.post('/:id/ship', protect, markShipped);
+
+// DELETE /api/auctions/:id
 router.delete('/:id', protect, deleteAuction);
 
 

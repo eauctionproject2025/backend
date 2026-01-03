@@ -70,6 +70,12 @@ const createAuction = async (req, res) => {
     if (!categories) {
       return res.status(400).json({ message: "Category is required" });
     }
+    // if (new Date(startTime) < new Date()) {
+    //   return res.status(400).json({ message: "Start time cannot be in the past" });
+    // }
+    // if (new Date(endTime) < new Date(startTime)) {
+    //   return res.status(400).json({ message: "End time cannot be before start time" });
+    // }
 
     // Upload all files in parallel
     const uploadPromises = req.files.map(file => {
@@ -116,7 +122,6 @@ const getAuctionById = async (req, res) => {
   try {
     const auction = await Auction.findById(req.params.id)
       .populate("seller", "username") // show seller info, email is not populated here
-      .populate("bids.bidder", "username blocked") // show bidder usernames
       .populate("winner", "username") // show winner username
       .populate("categories", "name icon"); // populate categories
 
@@ -178,38 +183,48 @@ const deleteAuction = async (req, res) => {
 };
 
 //  POST /api/auctions/:id/bid — Protected
-const placeBid = async (req, res) => {
-  try {
-    const auction = await Auction.findById(req.params.id);
+// const placeBid = async (req, res) => {
+//   try {
+//     const auction = await Auction.findById(req.params.id);
 
-    if (!auction) return res.status(404).json({ message: "Auction not found" });
+//     if (!auction) return res.status(404).json({ message: "Auction not found" });
 
-    const { amount } = req.body;
-    const bidderId = req.user.id;
+//     const { amount } = req.body;
+//     const bidderId = req.user.id;
 
-    //  Must be higher than current highest bid or startingBid
-    const highestBid =
-      auction.bids.length > 0
-        ? Math.max(...auction.bids.map((b) => b.amount))
-        : auction.startingBid;
+//     //  Must be higher than current highest bid or startingBid
+//     const highestBid =
+//       auction.bids.length > 0
+//         ? Math.max(...auction.bids.map((b) => b.amount))
+//         : auction.startingBid;
 
-    if (amount <= highestBid) {
-      return res
-        .status(400)
-        .json({ message: "Bid must be higher than current bid" });
-    }
+//     if (amount <= highestBid) {
+//       return res
+//         .status(400)
+//         .json({ message: "Bid must be higher than current bid" });
+//     }
 
-    auction.bids.push({ amount, bidder: bidderId, time: new Date() });
-    // Update the starting bid to the latest bid
-    auction.startingBid = amount;
+//     // Check if the last bidder is the current user
+//     if (auction.bids.length > 0) {
+//       const lastBidder = auction.bids[auction.bids.length - 1].bidder;
+//       if (lastBidder.toString() === bidderId) {
+//         return res
+//           .status(400)
+//           .json({ message: "You are already the highest bidder" });
+//       }
+//     }
 
-    await auction.save();
+//     auction.bids.push({ amount, bidder: bidderId, time: new Date() });
+//     // Update the starting bid to the latest bid
+//     auction.startingBid = amount;
 
-    res.status(201).json({ message: "Bid placed successfully", auction });
-  } catch (error) {
-    res.status(500).json({ message: "Failed to place bid" });
-  }
-};
+//     await auction.save();
+
+//     res.status(201).json({ message: "Bid placed successfully", auction });
+//   } catch (error) {
+//     res.status(500).json({ message: error.message ||"Failed to place bid" });
+//   }
+// };
 
 //Fetch auctions by userId
 const getAuctionsByUserId = async (req, res) => {
@@ -241,11 +256,35 @@ const getAuctionsByUserId = async (req, res) => {
   }
 };
 
+// Mark auction as shipped
+const markShipped = async (req, res) => {
+  try {
+    const auction = await Auction.findById(req.params.id);
+    if (!auction) return res.status(404).json({ message: "Auction not found" });
+
+    // Verify ownership
+    if (auction.seller.toString() !== req.user.id) {
+      return res.status(403).json({ message: "Not authorized" });
+    }
+
+    if (auction.paymentStatus !== "payment_held") {
+      return res.status(400).json({ message: "Payment must be held/received before shipping" });
+    }
+
+    auction.shipmentStatus = "shipped";
+    await auction.save();
+
+    res.json({ message: "Shipment status updated", auction });
+  } catch (error) {
+    res.status(500).json({ message: "Failed to update shipment status" });
+  }
+};
+
 module.exports = {
   getAllAuctions,
   createAuction,
   getAuctionById,
   deleteAuction,
-  placeBid,
   getAuctionsByUserId,
+  markShipped
 };

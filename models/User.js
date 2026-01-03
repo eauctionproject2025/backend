@@ -10,6 +10,8 @@ const userSchema = new mongoose.Schema({
   role: { type: String, enum: ["buyer", "seller", "admin"], default: "buyer" },
   description: { type: String },
   address: { type: String },
+  stripeAccountId: { type: String, default: "" }, 
+  stripeOnboardingComplete: { type: Boolean, default: false },
   blocked: {
     type: Boolean,
     default: false,

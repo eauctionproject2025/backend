@@ -20,7 +20,8 @@
     "express-validator": "^7.2.1",
     "jsonwebtoken": "^9.0.2",
     "mongoose": "^8.15.1",
-    "multer": "1.4.5-lts.2"
+    "multer": "1.4.5-lts.2",
+    "stripe": "^20.1.0"
   },
   "devDependencies": {
     "browserslist": "^4.25.0",
